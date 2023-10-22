@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { TestContext } from "./testContext";
+import { TimerContext } from "./TimerContext";
 
 
 const Item = (props)=>{
@@ -7,10 +7,15 @@ const Item = (props)=>{
  
 
     return(
-        <div onClick={()=>{
-            props.onChecked(props.id)
-        }}>
+        <div className="dltbtn">
+        <br/>
+
+        <h3 style={{color: "white"}} onClick={()=>{
+            props.onChecked(props.id) 
+        }} >
 {props.children}
+
+        </h3>
         </div>
     )
 }

@@ -1,95 +1,94 @@
-import React from 'react';
-import TimeList from './TimeList';
-import { TestContext } from './testContext';
+import React, { useContext, useState, useEffect } from 'react';
+import { TimerContext } from './TimerContext';
 
-var interval;
+function Timer(props) {
+  const [timer, setTimer] = useState({
+    hours: 0,
+    minutes: 0,
+    second: 0,
+    isStarted: false,
+  });
 
-class Timer extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-        hours : 0,
-        minutes : 0,
-        second : 0,
-        isStarted : false
+  const context = useContext(TimerContext);
+  var interval;
+
+  useEffect(() => {
+    if (timer.isStarted) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => {
+          let newSecond = prevTimer.second + 1;
+          let newMinutes = prevTimer.minutes;
+          let newHours = prevTimer.hours;
+
+          if (newSecond === 60) {
+            newSecond = 0;
+            newMinutes++;
+          }
+
+          if (newMinutes === 60) {
+            newMinutes = 0;
+            newHours++;
+          }
+
+          return {
+            hours: newHours,
+            minutes: newMinutes,
+            second: newSecond,
+            isStarted: prevTimer.isStarted,
+          };
+        });
+      }, 1000);
+    } else {
+      clearInterval(interval);
     }
-  }
 
-  static contextType = TestContext;
+    return () => clearInterval(interval);
+  }, [timer.isStarted]);
 
-  startTimer = () => {
-      if(this.state.isStarted == false){
-        this.setState({
-            isStarted : true
-        })
-        interval = setInterval(() => {
-            this.setState({
-                second: this.state.second +1
-            })
-            if(this.state.second == 59){
-    this.setState({
-        second : 0,
-        minutes : this.state.minutes +1
-    })
-            }
-            if(this.state.minutes == 60){
-                this.setState({
-                    minutes : 0,
-                    hours : this.state.hours +1
-                })
-            }     
-          }, 1000)
-      }
-  }
+  const startTimer = () => {
+    if (!timer.isStarted) {
+      setTimer({
+        ...timer,
+        isStarted: true,
+      });
+    }
+  };
 
-  stopTimer = () => {
-    this.setState({
-        isStarted :false
-    })
-    clearInterval(interval)
-  }
+  const stopTimer = () => {
+    setTimer({
+      ...timer,
+      isStarted: false,
+    });
+  };
 
-resetTimer = () =>{
-this.setState({
-    hours : 0,
-        minutes : 0,
-        second : 0,
-        isStarted: false
-})
-clearInterval(interval)
-}
+  const resetTimer = () => {
+    setTimer({
+      hours: 0,
+      minutes: 0,
+      second: 0,
+      isStarted: false,
+    });
+  };
 
-handleTimeArray = ()=>{
-  // let h = this.state.hours
-  //   let m = this.state.minutes
-  //   let s = this.state.second
-  //   let newTime = `${h > 9 ? h: "0" + h} : ${m > 9 ? m: "0" + m} : ${s > 9 ? s: "0" + s}`
-  let newTime= document.querySelector('.timer').innerText;
-    this.context.setTimerArr([...this.context.timeArr , newTime])
-}
-
-  render() {
-    let h = this.state.hours;
-    let m = this.state.minutes;
-    let s = this.state.second;
-
-    return (
-      <div >
-        <div className="timer rad">
-        <h2 onClick={this.handleTimeArray}>
-       { `${h > 9 ? h: "0" + h} : ${m > 9 ? m: "0" + m} : ${s > 9 ? s: "0" + s}`}
-        </h2>
-        </div>
-        <br/>
-        <button className='btn' onClick={this.startTimer}>Start</button>
-        <button className='btn' onClick={this.stopTimer}>Stop</button>
-        <button className='btn' onClick={this.resetTimer}>Reset</button>
-        <button className='btn' style={{backgroundColor : this.props.isLight ?  "purple" : "white" ,
-    color : this.props.isLight ? "white" : "green"
-    }} onClick={this.props.changeClicked}>{this.props.isLight ? "purple" : "Green"}</button> 
+  const handleTimeArray = () => {
+    const newTime = `${timer.hours.toString().padStart(2, '0')} : ${timer.minutes.toString().padStart(2, '0')} : ${timer.second.toString().padStart(2, '0')}`;
+    context.setTimerArr([...context.timeArr, newTime]);
+  };
+console.log(props.submitvalue);
+  return (
+    <>
+      <h2 ClassName='timerHover'>{props.submitvalue} Start the timer, Click on the running timer to get a record</h2> 
+      <br />
+      <div className="timer timerHover">
+        <h2 ClassName='timerHover' onClick={handleTimeArray}>{`${timer.hours.toString().padStart(2, '0')} : ${timer.minutes.toString().padStart(2, '0')} : ${timer.second.toString().padStart(2, '0')}`}</h2>
       </div>
-    )
-  }
+      <span className='row'>
+        <button className='btn' onClick={startTimer}>Start</button>
+        <button className='btn' onClick={stopTimer}>Stop</button>
+        <button className='btn' onClick={resetTimer}>Reset</button>
+      </span>
+    </>
+  );
 }
 
 export default Timer;
